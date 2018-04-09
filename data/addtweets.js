@@ -1,7 +1,6 @@
-
 // Knex Setup
 const env = process.env.NODE_ENV || 'development';
-const config = require('../knexfile')[env];
+const config = require('../knexfile')[env];  
 const knex = require('knex')(config);
 
 // bcrypt setup
@@ -117,8 +116,8 @@ let insertTweets = () => {
 
 
 deleteTweets().then(() => {
-//  return deleteFollowers();
-//}).then(() => {
+  return deleteFollowers();
+}).then(() => {
   return deleteUsers();
 }).then(() => {
   return insertUsers();
@@ -127,3 +126,4 @@ deleteTweets().then(() => {
 }).then(() => {
   console.log("OK, users and tweets created");
 });
+

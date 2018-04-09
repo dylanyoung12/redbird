@@ -12,6 +12,10 @@ export default new Vuex.Store({
     loginError: '',
     registerError: '',
     feed: [],
+    following: [],
+    followers: [],
+    userView: {},
+    feedView: [],
   },
   getters: {
     user: state => state.user,
@@ -19,6 +23,16 @@ export default new Vuex.Store({
     loginError: state => state.loginError,
     registerError: state => state.registerError,
     feed: state => state.feed,
+    following: state => state.following,
+    followers: state => state.followers,
+    isFollowing: state => (id) => {
+      return state.following.reduce((val, item) => {
+        if (item.id === id) return true;
+        else return val;
+      }, false);
+    },
+    userView: state => state.userView,
+    feedView: state => state.feedView,
   },
   mutations: {
     setUser (state, user) {
@@ -36,6 +50,18 @@ export default new Vuex.Store({
     setFeed (state, feed) {
       state.feed = feed;
     },
+    setFollowing (state, following) {
+      state.following = following;
+    },
+    setFollowers (state, followers) {
+      state.followers = followers;
+    },
+    setUserView (state, user) {
+      state.userView = user;
+    },
+    setFeedView (state, feed) {
+      state.feedView = feed;
+    }
   },
   actions: {
     // Registration, Login //
@@ -82,13 +108,6 @@ export default new Vuex.Store({
       context.commit('setLogin', false);
     },
     // Tweeting //
-    getFeed(context) {
-      axios.get("/api/users/" + context.state.user.id + "/tweets").then(response => {
-        context.commit('setFeed', response.data.tweets);
-      }).catch(err => {
-        console.log("getFeed failed: ", err);
-      });
-    },
     addTweet(context, tweet) {
       axios.post("/api/users/" + context.state.user.id + "/tweets", tweet).then(response => {
         return context.dispatch('getFeed');
@@ -109,6 +128,64 @@ export default new Vuex.Store({
       }).catch(err => {
         console.log("doHashTagSearch failed:", err);
       });
-    }
+    },
+    // get list of people you are following
+    getFollowing(context) {
+      return axios.get("/api/users/" + context.state.user.id + "/follow").then(response => {
+        context.commit('setFollowing', response.data.users);
+      }).catch(err => {
+        console.log("following failed", err);
+      });
+    },
+    // get list of people who are following you
+    getFollowers(context) {
+      return axios.get("/api/users/" + context.state.user.id + "/followers").then(response => {
+        context.commit('setFollowers', response.data.users);
+      }).catch(err => {
+        console.log("following failed:", err);
+      });
+    },
+    // follow someone, must supply {id: id} of user you want to follow
+    follow(context,user) {
+      return axios.post("/api/users/" + context.state.user.id + "/follow", user).then(response => {
+        context.dispatch('getFollowing');
+      }).catch(err => {
+        console.log("follow failed:", err);
+      });
+    },
+    // unfollow someone, must supply {id: id} of user you want to unfollow
+    unfollow(context,user) {
+      return axios.delete("/api/users/" + context.state.user.id + "/follow/" + user.id).then(response => {
+        context.dispatch('getFollowing');
+      }).catch(err => {
+        console.log("unfollow failed:", err);
+      });
+    },
+    // get tweets of people you follow
+    getFeed(context) {
+      return axios.get("/api/users/" + context.state.user.id + "/feed").then(response => {
+        context.commit('setFeed',response.data.tweets);
+      }).catch(err => {
+        console.log("getFeed failed:",err);
+      });
+    },
+
+    // Users //
+    // get a user, must supply {username: username} of user you want to get
+    getUser(context, user) {
+      return axios.get("/api/users/" + user.id).then(response => {
+        context.commit('setUserView', response.data.user);
+      }).catch(err => {
+        console.log("getUser failed:", err);
+      });
+    },
+    // get tweets of a user, must supply {id:id} of user you want to get tweets for
+    getUserTweets(context,user) {
+      return axios.get("/api/users/" + user.id + "/tweets").then(response => {
+        context.commit('setFeedView', response.data.tweets);
+      }).catch(err => {
+        console.log("getUserTweets failed:",err);
+      });
+    },
   }
 });
