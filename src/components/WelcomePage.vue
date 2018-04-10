@@ -1,6 +1,6 @@
 <template>
   <div class="column">
-    <img src="./static/images/red-bird.png"/>
+    <img src="../../static/images/red-bird.png"/>
     <h1>Follow the Red Bird. Or anyone else.</h1>
     <h2>Make friends in high places.</h2>
     <form v-on:submit.prevent="register()">
