@@ -70,4 +70,10 @@ a {
 .column {
   width: 800px;
 }
+.feed {
+  width: 600px;
+}
+.feed img {
+  width: 100%;
+}
 </style>
